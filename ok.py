@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random as random
 
-precision = tf.float32
+precision = np.float32
 num_train_pts = 1000
 num_test_pts = 5000
 hidden_dim = 300
