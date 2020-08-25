@@ -52,7 +52,7 @@ y_train=np.transpose(y_train).astype(precision)
 y_test=np.transpose(y_test).astype(precision)
 
 zeros = np.zeros(shape = (batch_size))
-zeros_test = np.zeros(shape=(num_test_pts))
+zeros2 = np.zeros(shape=(num_test_pts))
 
 def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho):
     W = tf.compat.v1.get_variable(name='l' + str(layer) + '_W', shape=[dim1, dim2],
@@ -64,13 +64,12 @@ def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho):
     return rho(tf.matmul(W, x) + b)
 
 
-def funcApprox(x, layers=depth, input_dim=input_dim, output_dim=output_dim, hidden_dim=hidden_dim):
-    print('Constructing the tensorflow nn graph')
+def funcApprox(x, depth, input_dim, output_dim, hidden_dim):
 
     weight_bias_initializer = tf.random_normal_initializer(stddev=delta)
 
     with tf.compat.v1.variable_scope('UniversalApproximator',reuse=tf.compat.v1.AUTO_REUSE):
-        # input layer description
+
         in_W = tf.compat.v1.get_variable(name='in_W', shape=[hidden_dim, input_dim],
                                           initializer=weight_bias_initializer, dtype=precision,)
 
@@ -81,11 +80,9 @@ def funcApprox(x, layers=depth, input_dim=input_dim, output_dim=output_dim, hidd
 
         x = rho(z)
 
-
-
-        for i in range(layers):
+        for i in range(depth):
             choice = 0
-            x = default_block(x, i, hidden_dim, hidden_dim, weight_bias_initializer, rho=rho)
+            x = default_block(x, i, hidden_dim, hidden_dim, weight_bias_initializer, rho)
             choice = 1
 
         out_v = tf.compat.v1.get_variable(name='out_v', shape=[output_dim, hidden_dim],
@@ -123,11 +120,11 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
 
 
 
-    y = funcApprox(x, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)
-    z = funcApprox(x_t, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)   
+    y = funcApprox(x, depth, input_dim,output_dim, hidden_dim)
+    z = funcApprox(x_t, depth, input_dim,output_dim, hidden_dim)   
     with tf.compat.v1.variable_scope('Loss'):    
         loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Sobolev_train_batch),axis =0),p),zeros)
-        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros_test)
+        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
     train_op = opt.minimize(loss)
