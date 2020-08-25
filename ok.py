@@ -12,7 +12,7 @@ input_dim = 2
 output_dim = 121
 rho = tf.nn.leaky_relu
 batch_size = 100
-epochs =1000
+epochs =10
 lrn_rate = 0.0002
 delta = 0.1
 p = 1
@@ -123,11 +123,11 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
 
 
 
-    y = funcApprox(x, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim,precision=precision)
-    z = funcApprox(x_t, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim,precision=precision)   
+    y = funcApprox(x, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)
+    z = funcApprox(x_t, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)   
     with tf.compat.v1.variable_scope('Loss'):    
-        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y)-tf.linalg.matmul(Gram,y_true),Gram_train_batch),axis =0),p),zeros)
-        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z)-tf.linalg.matmul(Gram,y_t),Gram_test),axis =0),zeros2)
+        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Gram_train_batch),axis =0),p),zeros)
+        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Gram_test),axis =0),zeros2)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
     train_op = opt.minimize(loss)
@@ -139,11 +139,11 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
         sess.run(tf.compat.v1.global_variables_initializer())
         for i in range(epochs):
 
-            for x_train_batch, y_true_train_batch, Gram_train_batch in get_batch(x_train, y_train, Gram_train,
+            for x_train_batch, y_train_batch, Gram_train_batch in get_batch(x_train, y_train, Gram_train,
                                                                                      batch_size):
                 current_loss, current_testloss, _ = sess.run([loss, validationloss, train_op],
                                                           feed_dict={x: x_train_batch, \
-                                                                     y_true: y_true_train_batch, \
+                                                                     y_true: y_train_batch, \
                                                                      x_t: x_test, \
                                                                      y_t: y_test,})
                 losses.append(current_loss)
