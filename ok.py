@@ -15,18 +15,26 @@ epochs =1000
 lrn_rate = 0.0002
 delta = 0.1
 p = 1
+Noise_size = 0
 corruption = 0
 
-x_test = np.load("X_test.npy")
 x_train = np.load("X_train.npy")
 y_train = np.load("Y_train.npy") 
+x_test = np.load("X_test.npy")
 y_test = np.load("Y_test.npy")
 Gram = np.load("G.npy")
 
 Sparse =  random.sample(range(num_train_pts),corruption)
 for randomsample in Sparse:
     y_train[randomsample] = y_train[randomsample] + np.random.normal(scale = 100, size = 121)
-
+    
+Normal = np.zeros(shape = (1000,121))
+for i in range(1000):
+    x = np.random.standard_normal(121)
+    x = x/np.linalg.norm(x)
+    Normal[i]=x
+y_train = y_train + Normal*Noise_size
+    
 Gram_train = np.zeros(shape = (num_train_pts,1))
 for i in range(y_train.shape[0]):
     Gram_train[i] = np.linalg.norm(np.matmul(Gram,y_train[i].reshape(121,1)))
