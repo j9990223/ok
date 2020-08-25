@@ -44,12 +44,12 @@ Gram_train = np.array(Gram_train).reshape(1,num_train_pts)
 Gram_test = np.zeros(shape = (num_test_pts,1))
 for i in range(y_test.shape[0]):
     Gram_test[i] = np.linalg.norm(np.matmul(Gram,y_test[i].reshape(121,1)))
-Gram_test = np.array(Gram_test).reshape(num_test_pts)
+Gram_test = np.array(Gram_test).reshape(1,num_test_pts)
 
-x_test=np.transpose(x_test).astype(np.float32)
-x_train=np.transpose(x_train).astype(np.float32)
-y_train=np.transpose(y_train).astype(np.float32) 
-y_test=np.transpose(y_test).astype(np.float32)
+x_test=np.transpose(x_test).astype(precision)
+x_train=np.transpose(x_train).astype(precision)
+y_train=np.transpose(y_train).astype(precision) 
+y_test=np.transpose(y_test).astype(precision)
 
 zeros = np.zeros(shape = (batch_size))
 zeros2 = np.zeros(shape=(num_test_pts))
