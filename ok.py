@@ -10,6 +10,7 @@ hidden_dim = 300
 depth = 11
 input_dim = 2
 output_dim = 121
+rho = tf.nn.leaky_relu
 batch_size = 100
 epochs =1000
 lrn_rate = 0.0002
@@ -52,9 +53,6 @@ y_test=np.transpose(y_test).astype(np.float32)
 
 zeros = np.zeros(shape = (batch_size))
 zeros2 = np.zeros(shape=(num_test_pts))
-
-rho = tf.nn.leaky_relu
-
 
 def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho, precision=precision):
     W = tf.compat.v1.get_variable(name='l' + str(layer) + '_W', shape=[dim1, dim2],
