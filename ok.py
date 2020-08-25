@@ -54,7 +54,7 @@ y_test=np.transpose(y_test).astype(precision)
 zeros = np.zeros(shape = (batch_size))
 zeros2 = np.zeros(shape=(num_test_pts))
 
-def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho, precision=precision):
+def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho):
     W = tf.compat.v1.get_variable(name='l' + str(layer) + '_W', shape=[dim1, dim2],
                                     initializer=weight_bias_initializer, dtype=precision)
 
@@ -64,7 +64,7 @@ def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho, precision=
     return rho(tf.matmul(W, x) + b)
 
 
-def funcApprox(x, layers=depth, input_dim=input_dim, output_dim=output_dim, hidden_dim=hidden_dim, precision=precision):
+def funcApprox(x, layers=depth, input_dim=input_dim, output_dim=output_dim, hidden_dim=hidden_dim):
     print('Constructing the tensorflow nn graph')
 
     weight_bias_initializer = tf.random_normal_initializer(stddev=delta)
@@ -85,8 +85,7 @@ def funcApprox(x, layers=depth, input_dim=input_dim, output_dim=output_dim, hidd
 
         for i in range(layers):
             choice = 0
-            x = default_block(x, i, hidden_dim, hidden_dim, weight_bias_initializer, precision=precision,
-                                rho=rho)
+            x = default_block(x, i, hidden_dim, hidden_dim, weight_bias_initializer, rho=rho)
             choice = 1
 
         out_v = tf.compat.v1.get_variable(name='out_v', shape=[output_dim, hidden_dim],
