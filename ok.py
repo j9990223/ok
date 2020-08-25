@@ -29,9 +29,9 @@ Sparse =  random.sample(range(num_train_pts),corruption)
 for randomsample in Sparse:
     y_train[randomsample] = y_train[randomsample] + np.random.normal(scale = 100, size = 121)
     
-Normal = np.zeros(shape = (1000,121))
-for i in range(1000):
-    x = np.random.standard_normal(121)
+Normal = np.zeros(shape = (num_train_pts,output_dim))
+for i in range(num_train_pts):
+    x = np.random.standard_normal(output_dim)
     x = x/np.linalg.norm(x)
     Normal[i]=x
 y_train = y_train + Normal*Noise_size
