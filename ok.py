@@ -52,7 +52,7 @@ y_train=np.transpose(y_train).astype(precision)
 y_test=np.transpose(y_test).astype(precision)
 
 zeros = np.zeros(shape = (batch_size))
-zeros2 = np.zeros(shape=(num_test_pts))
+zeros_test = np.zeros(shape=(num_test_pts))
 
 def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho):
     W = tf.compat.v1.get_variable(name='l' + str(layer) + '_W', shape=[dim1, dim2],
@@ -127,7 +127,7 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
     z = funcApprox(x_t, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)   
     with tf.compat.v1.variable_scope('Loss'):    
         loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Sobolev_train_batch),axis =0),p),zeros)
-        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
+        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros_test)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
     train_op = opt.minimize(loss)
