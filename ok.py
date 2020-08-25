@@ -1,6 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import random as random
 
 precision = tf.float32
 num_train_pts = 1000
@@ -14,6 +15,7 @@ epochs =1000
 lrn_rate = 0.0002
 delta = 0.1
 p = 1
+corruption = 0
 
 x_test = np.load("X_test.npy")
 x_train = np.load("X_train.npy")
@@ -30,18 +32,18 @@ for i in range(y_train.shape[0]):
     Gram_train[i] = np.linalg.norm(np.matmul(Gram,y_train[i].reshape(121,1)))
 Gram_train = np.array(Gram_train).reshape(1,num_train_pts)
 
-Gram_test = np.zeros(shape = (5000,1))
+Gram_test = np.zeros(shape = (num_test_pts,1))
 for i in range(y_test.shape[0]):
     Gram_test[i] = np.linalg.norm(np.matmul(Gram,y_test[i].reshape(121,1)))
-Gram_test = np.array(Gram_test).reshape(5000)
+Gram_test = np.array(Gram_test).reshape(num_test_pts)
 
 x_test=np.transpose(x_test).astype(np.float32)
 x_train=np.transpose(x_train).astype(np.float32)
 y_train=np.transpose(y_train).astype(np.float32) 
 y_test=np.transpose(y_test).astype(np.float32)
 
-zeros = np.zeros(shape = (100))
-zeros2 = np.zeros(shape=(5000))
+zeros = np.zeros(shape = (batch_size))
+zeros2 = np.zeros(shape=(num_test_pts))
 
 rho = tf.nn.leaky_relu
 
@@ -104,6 +106,7 @@ def get_batch(X_in, Y_in,Gram_train,batch_size):
         
 
 tf.compat.v1.reset_default_graph()
+tf.compat.v1.disable_eager_execution()
 
 with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope:
         # inputs to the NN
@@ -140,8 +143,16 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
                                                                      y_t: y_test,})
                 losses.append(current_loss)
                 testloss.append(current_testloss)
-        y_res = sess.run([y], feed_dict = {x: x_test.reshape(2,num_test_pts)})
+        y_res = sess.run([y], feed_dict = {x: x_test})
         y_NN = y_res[0]
+print('done')
+x = range(len(losses))
+plt.title(corruption)
+plt.loglog(x,losses)
+plt.loglog(x,testloss)
+plt.show()
+print(testloss[-1])
+
 
 zero = np.zeros(shape = (1,batch_size))
 
