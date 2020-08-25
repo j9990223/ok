@@ -36,15 +36,15 @@ for i in range(num_train_pts):
     Normal[i]=x
 y_train = y_train + Normal*Noise_size
     
-Gram_train = np.zeros(shape = (num_train_pts,1))
+Sobolev_train = np.zeros(shape = (num_train_pts,1))
 for i in range(y_train.shape[0]):
-    Gram_train[i] = np.linalg.norm(np.matmul(Gram,y_train[i].reshape(121,1)))
-Gram_train = np.array(Gram_train).reshape(1,num_train_pts)
+    Sobolev_train[i] = np.linalg.norm(np.matmul(Gram,y_train[i].reshape(121,1)))
+Sobolev_train = np.array(Sobolev_train).reshape(1,num_train_pts)
 
-Gram_test = np.zeros(shape = (num_test_pts,1))
+Sobolev_test = np.zeros(shape = (num_test_pts,1))
 for i in range(y_test.shape[0]):
-    Gram_test[i] = np.linalg.norm(np.matmul(Gram,y_test[i].reshape(121,1)))
-Gram_test = np.array(Gram_test).reshape(1,num_test_pts)
+    Sobolev_test[i] = np.linalg.norm(np.matmul(Gram,y_test[i].reshape(121,1)))
+Sobolev_test = np.array(Sobolev_test).reshape(1,num_test_pts)
 
 x_test=np.transpose(x_test).astype(precision)
 x_train=np.transpose(x_train).astype(precision)
@@ -97,7 +97,7 @@ def funcApprox(x, layers=depth, input_dim=input_dim, output_dim=output_dim, hidd
         z = tf.math.add(tf.linalg.matmul(out_v, x, name='output_vx'), out_b, name='output')
         return z
 
-def get_batch(X_in, Y_in,Gram_train,batch_size):
+def get_batch(X_in, Y_in,Sobolev_train,batch_size):
     X_cols = X_in.shape[0]
     Y_cols = Y_in.shape[0]
 
@@ -106,7 +106,7 @@ def get_batch(X_in, Y_in,Gram_train,batch_size):
 
         yield X_in.take(range(idx,idx+batch_size), axis = 1, mode = 'wrap').reshape(X_cols,batch_size), \
               Y_in.take(range(idx,idx+batch_size), axis = 1, mode = 'wrap').reshape(Y_cols,batch_size),\
-              Gram_train.take(range(idx,idx+batch_size), axis = 1, mode = 'wrap').reshape(1, batch_size)
+              Sobolev_train.take(range(idx,idx+batch_size), axis = 1, mode = 'wrap').reshape(1, batch_size)
 
         
 
@@ -119,15 +119,15 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
     y_true = tf.compat.v1.placeholder(precision, shape=[output_dim, None], name='y_true')
     x_t = tf.compat.v1.placeholder(precision, shape=[input_dim, None], name='x_test')
     y_t = tf.compat.v1.placeholder(precision, shape=[output_dim, None], name='y_test')
-    Gram_train_batch = 1
+    Sobolev_train_batch = 1
 
 
 
     y = funcApprox(x, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)
     z = funcApprox(x_t, layers=depth, input_dim=input_dim,output_dim=output_dim, hidden_dim=hidden_dim)   
     with tf.compat.v1.variable_scope('Loss'):    
-        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Gram_train_batch),axis =0),p),zeros)
-        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Gram_test),axis =0),zeros2)
+        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Sobolev_train_batch),axis =0),p),zeros)
+        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
     train_op = opt.minimize(loss)
@@ -139,7 +139,7 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
         sess.run(tf.compat.v1.global_variables_initializer())
         for i in range(epochs):
 
-            for x_train_batch, y_train_batch, Gram_train_batch in get_batch(x_train, y_train, Gram_train,
+            for x_train_batch, y_train_batch, Sobolev_train_batch in get_batch(x_train, y_train, Sobolev_train,
                                                                                      batch_size):
                 current_loss, current_testloss, _ = sess.run([loss, validationloss, train_op],
                                                           feed_dict={x: x_train_batch, \
