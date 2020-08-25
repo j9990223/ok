@@ -1,36 +1,29 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-import random as random
-error = [990,990,990,990,990,990,990,990,990,990]
-error1 = [995,995,995,995,995,995,995,995,995,995]
-error0 = [980,980,980,980,980,980,980,980,980,980]
-counter = 0
-for corruption in error0:
-    counter = counter + 1
-    precision = tf.float32
 
-    num_train_pts = 1000
-    num_test_pts = 5000
+precision = tf.float32
 
-    hidden_dim = 300
-    depth = 11
-    input_dim = 2
-    output_dim = 121
-    batch_size = 100
-    delta = 0.1
-    epochs =1000
+num_train_pts = 1000
+num_test_pts = 5000
+hidden_dim = 300
+depth = 11
+input_dim = 2
+output_dim = 121
+batch_size = 100
+epochs =1000
+lrn_rate = 0.0002
+delta = 0.1
 
+x_test = np.load("X_test.npy")
+x_train = np.load("X_train.npy")
+y_train = np.load("Y_train.npy") 
+y_test = np.load("Y_test.npy")
+Sqrt_Gram = np.load("G.npy")
 
-    x_test = np.load("X_test.npy")
-    x_train = np.load("X_train.npy")
-    y_train = np.load("Y_train.npy") 
-    y_test = np.load("Y_test.npy")
-    Gram = np.load("G.npy")
-
-    Sparse =  random.sample(range(1000),corruption)
-    for randomsample in Sparse:
-        y_train[randomsample] = y_train[randomsample] + np.random.normal(scale = 100, size = 121)
+Sparse =  random.sample(range(1000),corruption)
+for randomsample in Sparse:
+    y_train[randomsample] = y_train[randomsample] + np.random.normal(scale = 100, size = 121)
 
 
     Gram_train = np.zeros(shape = (1000,1))
@@ -131,8 +124,8 @@ for corruption in error0:
             loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y)-tf.linalg.matmul(Gram,y_true),Gram_train_batch),axis =0),1/64),zeros)
             #loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.linalg.matmul(Gram,y)-tf.linalg.matmul(Gram,y_true),axis =0),0.5),zeros)
             validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z)-tf.linalg.matmul(Gram,y_t),Gram_test),axis =0),zeros2)
-        init_rate = 0.0002
-        lrn_rate = init_rate
+
+        lrn_rate 
         opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
         train_op = opt.minimize(loss)
 
