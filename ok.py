@@ -111,7 +111,7 @@ tf.compat.v1.reset_default_graph()
 tf.compat.v1.disable_eager_execution()
 
 with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope:
-        # inputs to the NN
+
     x = tf.compat.v1.placeholder(precision, shape=[input_dim, None], name='input')
     y_true = tf.compat.v1.placeholder(precision, shape=[output_dim, None], name='y_true')
     x_t = tf.compat.v1.placeholder(precision, shape=[input_dim, None], name='x_test')
