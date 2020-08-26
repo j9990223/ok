@@ -126,8 +126,10 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
     y = funcApprox(x, depth, input_dim,output_dim, hidden_dim)
     z = funcApprox(x_t, depth, input_dim,output_dim, hidden_dim)   
     with tf.compat.v1.variable_scope('Loss'):    
-        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Sobolev_train_b),axis =0),p),zeros)
-        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
+        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(
+               tf.linalg.matmul(Gram,y-y_true),Sobolev_train_b),axis =0),p),zeros)
+        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(
+                         tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
     train_op = opt.minimize(loss)
