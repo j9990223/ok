@@ -128,7 +128,7 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
     with tf.compat.v1.variable_scope('Loss'):    
         loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(
                tf.linalg.matmul(Gram,y-y_true),Sobolev_train_b),axis =0),p),zeros)
-        validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(
+        test_loss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(
                          tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
@@ -143,7 +143,7 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
 
             for x_train_batch, y_train_batch, Sobolev_train_batch in get_batch(x_train, y_train, Sobolev_train,
                                                                                      batch_size):
-                current_loss, current_testloss, _ = sess.run([loss, validationloss, train_op],
+                current_loss, current_testloss, _ = sess.run([loss, test_loss, train_op],
                                                           feed_dict={x: x_train_batch, \
                                                                      y_true: y_train_batch, \
                                                                      x_t: x_test, \
