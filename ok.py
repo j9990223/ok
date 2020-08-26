@@ -65,11 +65,12 @@ def default_block(x, layer, dim1, dim2, weight_bias_initializer, rho):
 
 
 def funcApprox(x, depth, input_dim, output_dim, hidden_dim):
+    print('Constructing the tensorflow nn graph')
 
     weight_bias_initializer = tf.random_normal_initializer(stddev=delta)
 
     with tf.compat.v1.variable_scope('UniversalApproximator',reuse=tf.compat.v1.AUTO_REUSE):
-
+        # input layer description
         in_W = tf.compat.v1.get_variable(name='in_W', shape=[hidden_dim, input_dim],
                                           initializer=weight_bias_initializer, dtype=precision,)
 
@@ -79,6 +80,8 @@ def funcApprox(x, depth, input_dim, output_dim, hidden_dim):
         z = tf.matmul(in_W, x) + in_b
 
         x = rho(z)
+
+
 
         for i in range(depth):
             choice = 0
@@ -116,14 +119,14 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
     y_true = tf.compat.v1.placeholder(precision, shape=[output_dim, None], name='y_true')
     x_t = tf.compat.v1.placeholder(precision, shape=[input_dim, None], name='x_test')
     y_t = tf.compat.v1.placeholder(precision, shape=[output_dim, None], name='y_test')
-    Sobolev_train_batch = 1
+    Sobolev_train_b = tf.compat.v1.placeholder(precision, shape=[1, None], name='S_train')
 
 
 
     y = funcApprox(x, depth, input_dim,output_dim, hidden_dim)
     z = funcApprox(x_t, depth, input_dim,output_dim, hidden_dim)   
     with tf.compat.v1.variable_scope('Loss'):    
-        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Sobolev_train_batch),axis =0),p),zeros)
+        loss = tf.compat.v1.losses.absolute_difference(tf.math.pow(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,y-y_true),Sobolev_train_b),axis =0),p),zeros)
         validationloss = tf.compat.v1.losses.absolute_difference(tf.linalg.norm(tf.math.divide(tf.linalg.matmul(Gram,z-y_t),Sobolev_test),axis =0),zeros2)
 
     opt = tf.compat.v1.train.AdamOptimizer(learning_rate=lrn_rate)
@@ -142,7 +145,8 @@ with tf.compat.v1.variable_scope('Graph',reuse=tf.compat.v1.AUTO_REUSE) as scope
                                                           feed_dict={x: x_train_batch, \
                                                                      y_true: y_train_batch, \
                                                                      x_t: x_test, \
-                                                                     y_t: y_test,})
+                                                                     y_t: y_test,
+                                                                    Sobolev_train_b : Sobolev_train_batch})
                 losses.append(current_loss)
                 testloss.append(current_testloss)
         y_res = sess.run([y], feed_dict = {x: x_test})
@@ -154,7 +158,6 @@ plt.loglog(x,losses)
 plt.loglog(x,testloss)
 plt.show()
 print(testloss[-1])
-
 
 zero = np.zeros(shape = (1,batch_size))
 
