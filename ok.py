@@ -160,25 +160,3 @@ plt.loglog(x,losses)
 plt.loglog(x,testloss)
 plt.show()
 print(testloss[-1])
-
-zero = np.zeros(shape = (1,batch_size))
-
-train_x = np.random.uniform(-1,1,size = num_train_pts)
-train_y = np.random.uniform(-1,1,size = num_train_pts)
-y_train = np.exp(-(np.cos(train_x)+np.cos(train_y))/16)
-x_train = np.zeros(shape = (num_train_pts,2))
-for i in range(num_train_pts):
-    x_train[i] = (train_x[i],train_y[i])
-
-    
-x_train = np.transpose(x_train).astype(np.float32)
-y_train = np.transpose(y_train).reshape(1,num_train_pts).astype(np.float32)
-
-test_x = np.random.uniform(-1,1,size = num_test_pts)
-test_y = np.random.uniform(-1,1,size = num_test_pts)
-y_test = np.exp(-(np.cos(test_x)+np.cos(test_y))/16)
-x_test = np.zeros(shape = (num_test_pts,2))
-for i in range(num_test_pts):
-    x_test[i] = (test_x[i],test_y[i])
-x_test = np.transpose(x_test).astype(np.float32)
-y_test = np.transpose(y_test).reshape(1,num_test_pts).astype(np.float32)
